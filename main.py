@@ -3,6 +3,13 @@ import tkinter as tk
 from tkinter.filedialog import askopenfilename
 import pyperclip
 
+def copy_art_to_clipboard(art):
+    try:
+        pyperclip.copy(art)
+        print("Art succesfully copied to the clipboard!")
+    except:
+        print("ERROR: An error occured!")
+
 def generate_art(data, ascii_width):
     prepared_art = "" # placeholder
     with open("ascii.txt", "w") as file:
@@ -73,13 +80,6 @@ def load_image():
             generate_art(data, ascii_width) # take the preprocessed data and turn it into art
     except:
         print("ERROR: File has to be an image!")
-
-def copy_art_to_clipboard(art):
-    try:
-        pyperclip.copy(art)
-        print("Art succesfully copied to the clipboard!")
-    except:
-        print("ERROR: An error occured!")
 
 def main():
     load_image()
