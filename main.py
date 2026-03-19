@@ -2,6 +2,7 @@ from PIL import Image
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
 import pyperclip
+import click
 
 def copy_art_to_clipboard(art):
     try:
@@ -27,20 +28,19 @@ def generate_art(data, ascii_width):
             for i in range(0, len(data), ascii_width):
                  prepared_art += content[i:i+ascii_width] + "\n"
             file.write(prepared_art)
-    copy_art_to_clipboard(prepared_art)
+            return prepared_art
 
 def pick_size(image, size): # image obj; size in string from (small, medium, big)
     ascii_width = image.width
     ascii_height = image.height
     proportions = 1
     
-    # SIZE = {"S": 100, "M": 150, "B": 200}
     # assign adequate size
-    if size == "small":
+    if size == "s":
         shorter_edge = 100
-    if size == "medium":
+    if size == "m":
         shorter_edge = 150
-    if size == "big":
+    if size == "b":
         shorter_edge = 200
     
     # calculate art size
@@ -55,20 +55,20 @@ def pick_size(image, size): # image obj; size in string from (small, medium, big
     else: # square
         return shorter_edge, int(shorter_edge * 0.5) # ascii are a lot higher than wider
             
-    # print(f"width:{ascii_width} height:{ascii_height} proportions:{proportions}")
     return int(ascii_width), int(ascii_height * 0.5) # has to be int, float could cause crashes
 
-def load_image():
+def get_image():
     tk.Tk().withdraw()
     try:
-        file_name = askopenfilename(title="Select an image to generate art from.")
+        return askopenfilename(title="Select an image to generate art from.")
     except:
         print("ERROR: Wrong file!")
         return 0
-    
+
+def load_image(file, size):
     try:
-        with Image.open(file_name) as image: # create Image object with Pillow     
-            ascii_width, ascii_height = pick_size(image, "big") 
+        with Image.open(file) as image: # create Image object with Pillow     
+            ascii_width, ascii_height = pick_size(image, size) 
             # print(f"width:{ascii_width} height:{ascii_height}")
 
             image = image.resize((ascii_width, ascii_height))
@@ -77,12 +77,28 @@ def load_image():
             image = image.convert("L") # convert to black and white for easier ASCII translation
             data = image.get_flattened_data()
                     
-            generate_art(data, ascii_width) # take the preprocessed data and turn it into art
+            return generate_art(data, ascii_width) # take the preprocessed data and turn it into art
     except:
         print("ERROR: File has to be an image!")
 
-def main():
-    load_image()
+@click.command()
+@click.option('--copy', is_flag=True, help='Copy art to your Clipboard.') 
+def art_cli(copy):
+    print('''\nSimple ASCII art generator.\nThe art is automatically saved to "ascii.txt".
+          If you don't provide path to image, a dialog window will pop up. 
+          You can choose size from "s" - small; "m" - medium; "b" - big. \nType '--copy' to copy to clipboard or "--help" for more.\n''')
+    
+    file = click.prompt("Specify a file path. (Can leave empty for a file picker pop-up.)\n", default=False)
+    if not file:
+        file = get_image()
+    
+    size = click.prompt("Specify size of the art. Default is 'm' - 150.\n", default="m")
+    art = load_image(file, size)   
+    
+    if copy:
+         copy_art_to_clipboard(art)
+
+    print(art)
 
 if __name__ == "__main__":
-    main()
+    art_cli()
