@@ -1,26 +1,26 @@
 from PIL import Image
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
+import pyperclip
 
 def generate_art(data, ascii_width):
+    prepared_art = "" # placeholder
     with open("ascii.txt", "w") as file:
             content = "" # placeholder 
 
-            ascii_chars = (".", "'", "-", "+", "*", "=", "x", "X", "%", "#")
-            ascii_count = len(ascii_chars)
+            ascii_palette = (".", "'", "-", "+", "*", "=", "x", "X", "%", "#")
+            ascii_count = len(ascii_palette)
             MAX_LIGHT_VAL = 256
             
             # calculate ascii index for every pixel
             for light_val in data:
-                content += ascii_chars[(light_val * ascii_count) // MAX_LIGHT_VAL]
-
-            final_content = "" # placeholder
+                content += ascii_palette[(light_val * ascii_count) // MAX_LIGHT_VAL]
 
             # slice the data into rows and store 
             for i in range(0, len(data), ascii_width):
-                 final_content += content[i:i+ascii_width] + "\n"
-                
-            file.write(final_content)
+                 prepared_art += content[i:i+ascii_width] + "\n"
+            file.write(prepared_art)
+    copy_art_to_clipboard(prepared_art)
 
 def pick_size(image, size): # image obj; size in string from (small, medium, big)
     ascii_width = image.width
@@ -61,7 +61,7 @@ def load_image():
     
     try:
         with Image.open(file_name) as image: # create Image object with Pillow     
-            ascii_width, ascii_height = pick_size(image, "medium") 
+            ascii_width, ascii_height = pick_size(image, "big") 
             # print(f"width:{ascii_width} height:{ascii_height}")
 
             image = image.resize((ascii_width, ascii_height))
@@ -73,6 +73,13 @@ def load_image():
             generate_art(data, ascii_width) # take the preprocessed data and turn it into art
     except:
         print("ERROR: File has to be an image!")
+
+def copy_art_to_clipboard(art):
+    try:
+        pyperclip.copy(art)
+        print("Art succesfully copied to the clipboard!")
+    except:
+        print("ERROR: An error occured!")
 
 def main():
     load_image()
