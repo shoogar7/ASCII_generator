@@ -16,7 +16,7 @@ def generate_art(data, ascii_width):
     with open("ascii.txt", "w") as file:
             content = "" # placeholder 
 
-            ascii_palette = (".", "'", "-", "+", "*", "=", "x", "X", "%", "#")
+            ascii_palette = ('.', ',', '-', '~', '+', '=', 'x', '9', 'X', '%', '$', '@', '#')
             ascii_count = len(ascii_palette)
             MAX_LIGHT_VAL = 256
             
@@ -86,9 +86,12 @@ def load_image(file, size):
 def art_cli(copy):
     print('''\nSimple ASCII art generator.\nThe art is automatically saved to "ascii.txt".
           If you don't provide path to image, a dialog window will pop up. 
-          You can choose size from "s" - small; "m" - medium; "b" - big. \nType '--copy' to copy to clipboard or "--help" for more.\n''')
+          You can choose size from:
+          "s" - small, 
+          "m" - medium, 
+          "b" - big \nType '--copy' to copy to clipboard or "--help" for more.\n''')
     
-    file = click.prompt("Specify a file path. (Can leave empty for a file picker pop-up.)\n", default=False)
+    file = click.prompt("Specify a file path. (Can leave empty for a file picker pop-up.)\n", default='')
     if not file:
         file = get_image()
     
