@@ -62,7 +62,7 @@ def get_image():
     try:
         return askopenfilename(title="Select an image to generate art from.")
     except:
-        print("ERROR: Wrong file!")
+        print("ERROR: Wrong file type!")
         return 0
 
 def load_image(file, size):
@@ -81,27 +81,52 @@ def load_image(file, size):
     except:
         print("ERROR: File has to be an image!")
 
+def inner_machinations(file, copy):
+    if not file:
+        file = click.prompt("Specify a file path. (Can leave empty for a file picker pop-up.)\n", default='')
+        if not file:
+            file = get_image()
+        
+    size = click.prompt("Specify size of the art. Default is 'm' - 150.\n", default="m")
+    art = load_image(file, size)   
+    
+    if copy:
+        copy_art_to_clipboard(art)
+
+    click.echo(art)
+        
+    return art, file
+
 @click.command()
 @click.option('--copy', is_flag=True, help='Copy art to your Clipboard.') 
 def art_cli(copy):
-    print('''\nSimple ASCII art generator.\nThe art is automatically saved to "ascii.txt".
+    file = None
+    click.echo('''\nSimple ASCII art generator.\nThe art is automatically saved to "ascii.txt".
           If you don't provide path to image, a dialog window will pop up. 
           You can choose size from:
           "s" - small, 
           "m" - medium, 
           "b" - big \nType '--copy' to copy to clipboard or "--help" for more.\n''')
     
-    file = click.prompt("Specify a file path. (Can leave empty for a file picker pop-up.)\n", default='')
-    if not file:
-        file = get_image()
-    
-    size = click.prompt("Specify size of the art. Default is 'm' - 150.\n", default="m")
-    art = load_image(file, size)   
-    
-    if copy:
-         copy_art_to_clipboard(art)
-
-    print(art)
+    while True:
+        art, file = inner_machinations(file, copy)
+        
+        response = click.prompt('''What would you like to do? \nExit [x] \nCopy [c] \nChange size [s] \nCreate another art [Enter]\n''', default='')
+        if response == '':
+            file = None
+            continue
+        if response == 'c':
+            file = None
+            copy_art_to_clipboard(art)
+            break
+        if 'c' in response:
+            copy_art_to_clipboard(art)
+        if 'x' in response:
+            break
+        if 's' in response:
+            continue
+        else:
+            break
 
 if __name__ == "__main__":
     art_cli()
